@@ -1,10 +1,7 @@
 const express = require("express");
 const {
   userCredentials,
-  payment,
-  Transaction,
-  clientdata,
-  quota,
+  
 } = require("./dbase/modules");
 let nodemailer = require("nodemailer");
 let app = express.Router();
@@ -78,46 +75,21 @@ app.post("/login", (req, res, next) => {
 
 // Create user signup
 
-app.post("/usersignup", (req, res, next) => {
+app.post("/userSignup", (req, res, next) => {
   if (!req.body.loginId || !req.body.password) {
   } else {
     employee.findOne({ loginId: req.body.loginId }, (err, doc) => {
       if (!err && !doc) {
         let user = new userCredentials({
-          loginId: req.body.loginId,
-          employeeName: req.body.name,
-          employeeEmail: req.body.email,
-          companyName: req.body.companyName,
-          shortCode: req.body.shortCode,
-          employeePassword: req.body.password,
-          employeeContactNum: req.body.employeeContactNum,
-          createdBy: req.body.createdBy,
-          Role: req.body.Role,
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+          status: "Signup",
         });
         employ.save((err, doc) => {
           if (!err) {
-            if (doc.Role.toLowerCase() == "admin") {
-              let newQuota = new quota({
-                Limit: 5,
-                Utilized: 0,
-                BelongsTo: doc._id,
-                CreditBalance: 0,
-                Rate: 10,
-              });
-              newQuota.save((err, qta) => {
-                console.log("Employee with quota", doc, qta);
-                res.send({ message: "Admin  created", data: { doc, qta } });
-                emailSnd(doc);
-              });
-            } else {
-              res.send({ message: "Member  created", doc });
-              emailSnd(doc);
-            }
-            // req.body.employeeNumber ? emailSnd(doc) : emailSnd(doc);
-            // emailSnd(doc);
-            // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(req.body.email)
-            //   ? emailSnd(doc)
-            //   : smsSnd(doc);
+             res.status(200).send("User Successfully Created, ",doc);
+          
           } else {
             res.status(500).send("Error in creating Employee, " + err);
           }

@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  employee,
+  userCredentials,
   payment,
   Transaction,
   clientdata,
@@ -9,154 +9,12 @@ const {
 let nodemailer = require("nodemailer");
 let app = express.Router();
 
-let http = require("http");
-let APIKey = "f51c3293f9caacc25126cfc70764ccfd";
-let sender = "8583";
 
-const transporter = nodemailer.createTransport({
-  host: "mail.tecstik.com",
-  port: 465,
-  auth: {
-    user: "appSupport@tecstik.com",
-    pass: "hammadazfar",
-  },
-});
 
-function emailSnd(doc) {
-  console.log(doc, "sending email");
-  let mailOptions = {
-    from: "appSupport@tecstik.com",
-    to: doc.employeeEmail,
-    subject: "Your account has been created successfully!",
-    // html: `<h1>Your ${doc.employeeName} account has been created on KollectIt as role ${doc.Role}</h1>`,
-    html: `<html>
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Email</title>
-    </head>
-    
-    <body style="font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; color: black;">
-        <div style="padding: 5%; margin: 5%;">
-            <img src="https://assets.unlayer.com/stock-templates1686637583455-kollect-logo.png" alt="KollectIt logo"
-                style="display: block; margin-left: auto;margin-right: auto;">
-            <br />
-            <br />
-            <br />
-            <div>
-                <div style="padding: 1%;">
-                    <p>Dear <b>${doc.employeeName}</b>,</p>
-                </div>
-                <div style="padding: 1%;">
-                    <p>This is an automated email from the KollectIt app.</p>
-                </div>
-                <div style="padding: 1%;">
-                    <p>Your account on KollectIt app has successfully been created for <b>${doc.companyName}</b> as role of <b>${doc.Role}</b>
-                        with the following details:</p>
-                </div>
-            </div>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style=" border: 1px solid black;  text-align: left; padding: 8px;">Name</td>
-                    <td style=" border: 1px solid black;  text-align: left; padding: 8px;"><b>${doc.employeeName}</b></td>
-                </tr>
-                <tr>
-                    <td style=" border: 1px solid black;  text-align: left; padding: 8px;">Organization</td>
-                    <td style=" border: 1px solid black;  text-align: left; padding: 8px;"><b>${doc.companyName}</b></td>
-                </tr>
-                <tr>
-                    <td style=" border: 1px solid black;  text-align: left; padding: 8px;">role</td>
-                    <td style=" border: 1px solid black;  text-align: left; padding: 8px;"><b>${doc.Role}</b></td>
-                </tr>
-            </table>
-            <div style="padding: 1%;">
-                <p>Your account on KollectIt app has successfully been created for <b>${doc.companyName}</b> as role of <br> ${doc.Role}
-                    with the following details:</p>
-            </div>
-            <br />
-            <br />
-            <div style="background-color: #CFE2F3;">
-                <div style="padding: 1%;">
-                    <p>You may download the app from Android Play Store and Apple App Store to continue using The KollectIt
-                        Mobile App with your login credentials.</p>
-                </div>
-                <div style="padding: 1%;">
-                    <p>We advise you to immediately change your password after the first time you log in.</p>
-                </div>
-                <div style="padding: 1%;">
-                    <p>Have a look at KollectIt’s tutorials using the following link:</p>
-                </div>
-                <div style="padding: 1%;">
-                    <a href="">http://kollectit.tecstik.com</a>
-                </div>
-    
-            </div>
-            <div>
-                <div>
-                    <h3 style="margin-left: 4%;">From</h4>
-                </div>
-                <div>
-                    <img src="https://assets.unlayer.com/stock-templates1686642734482-tecstik.png" style="display: block;">
-                </div>
-                <div>
-                    <h3 style="margin-left: 4%;">TecStik</h4>
-                </div>
-    
-            </div>
-    
-            <div style="background-color: #134F5C; color: white; padding: 2; ">
-                <p style="padding: 1%;">KollectIt is a payment collection app by TecStik TM to address the issues faced
-                    in Payment
-                    collection.</p>
-            </div>
-        </div>
-    </body>
-    
-    </html>`,
-  };
 
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("error=>", error);
-    } else {
-      console.log("Email sent: =>" + info.response);
-    }
-  });
-}
 
-function smsSnd(doc) {
-  console.log("sending sms");
-  let receiver = doc.employeeEmail;
-  let textmessage = `<h1>Your ${doc.employeeName} account has been created on KollectIt as role ${doc.Role}</h1>`;
-  let options = {
-    host: "api.veevotech.com",
-    path:
-      "/sendsms?hash=" +
-      APIKey +
-      "&receivenum=" +
-      receiver +
-      "&sendernum=" +
-      encodeURIComponent(sender) +
-      "&textmessage=" +
-      encodeURIComponent(textmessage),
-    method: "GET",
-    setTimeout: 30000,
-  };
-  let req = http.request(options, (res) => {
-    res.setEncoding("utf8");
-    res.on("data", (chunk) => {
-      console.log(chunk.toString());
-    });
-    console.log("STATUS: " + res.statusCode);
-  });
-  req.on("error", function (e) {
-    console.log("problem with request: " + e.message);
-  });
-  console.log(options, "options");
-  console.log(receiver, "receiver");
-  req.end();
-}
+
 // change password
 
 app.post("/ChangePassword", (req, res, next) => {
@@ -218,14 +76,14 @@ app.post("/login", (req, res, next) => {
   });
 });
 
-// Create Empolyee
+// Create user signup
 
-app.post("/employe", (req, res, next) => {
+app.post("/usersignup", (req, res, next) => {
   if (!req.body.loginId || !req.body.password) {
   } else {
     employee.findOne({ loginId: req.body.loginId }, (err, doc) => {
       if (!err && !doc) {
-        let employ = new employee({
+        let user = new userCredentials({
           loginId: req.body.loginId,
           employeeName: req.body.name,
           employeeEmail: req.body.email,

@@ -77,6 +77,13 @@ app.post("/login", (req, res, next) => {
 
 app.post("/userSignup", (req, res, next) => {
   if (!req.body.loginId || !req.body.password) {
+    res.status(409).send(`
+                    Please send complete request body
+              username:,
+              email: 
+      password: 
+                `);
+    return;
   } else {
     employee.findOne({ loginId: req.body.loginId }, (err, doc) => {
       if (!err && !doc) {
@@ -91,7 +98,7 @@ app.post("/userSignup", (req, res, next) => {
              res.status(200).send("User Successfully Created, ",doc);
           
           } else {
-            res.status(500).send("Error in creating Employee, " + err);
+            res.status(500).send("Error in creating user, " + err);
           }
         });
       } else if (err) {

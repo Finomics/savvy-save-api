@@ -575,7 +575,7 @@ app.post("/upload", upload.any(), (req, res, next) => {
   });
 });
 
-// PaymentData Api
+//  creating UserProfile
 
 app.post("/PaymentData", (req, res, next) => {
   if (!req.body.PaymentId && !req.body.belongsTo) {

@@ -70,7 +70,7 @@ let userCredentialsSchema = mongoose.Schema({
   createdOn: { type: Date, default: Date.now },
 });
 
-let userCredentials = mongoose.model("UserProfile", userCredentialsSchema);
+let userCredentials = mongoose.model("UserCredentials", userCredentialsSchema);
 
 // user Profile End
 

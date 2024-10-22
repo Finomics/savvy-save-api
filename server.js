@@ -15,19 +15,12 @@ let parseString = require("xml2js").parseString;
 let date_ob = new Date();
 const { ServerSecretKey, PORT } = require("./core/index");
 const {
-  payment,
-  employee,
-  otpModel,
-  clientdata,
-  quota,
-  SmSledger,
-  Voucher,
-  Bill,Merchant
+ userCredentials,
+ userProfile
 } = require("./dbase/modules");
 const serviceAccount = require("./firebase/firebase.json");
 const client = new postmark.Client("fa2f6eae-eaa6-4389-98f0-002e6fc5b900");
-// const client = new postmark.Client("404030c2-1084-4400-bfdb-af97c2d862b3");
-// let client = new postmark.ServerClient("404030c2-1084-4400-bfdb-af97c2d862b3");
+
 let http = require("http");
 const { log } = require("console");
 let APIKey = "23660c0f820f472379b8638bfa4f47f6"; //"f51c3293f9caacc25126cfc70764ccfd";
@@ -52,473 +45,15 @@ let setClient;
 let setClientName;
 let setMode;
 let setqty;
-function emailSnd(message, email) {
-  console.log("sending email");
-  let mailOptions = {
-    from: "appSupport@tecstik.com",
-    to: email,
-    subject: "KollectIt",
-    html: `<h1>Your ${message}</h1>`,
-  };
 
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("Email error=>", error);
-    } else {
-      console.log("Email sent: =>" + info.response);
-    }
-  });
-}
-//- otp  email
-function otpEmail(email, textmessage) {
-  // console.log(textmessage, docEamil, "sending otp email");
-  let mailOptions = {
-    from: "appSupport@tecstik.com",
-    to: email,
-    subject: "KollectIt OTP ",
-    html: `<!DOCTYPE html>
-    <html>
-    
-    <head>
-        <title></title> <!-- The title tag shows in email notifications, like Android 4.4. -->
-    
-        <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
-    
-    
-        <style>
-            html,
-            body {
-                margin: 0 auto !important;
-                padding: 0 !important;
-                height: 100% !important;
-                width: 100% !important;
-                background: #f1f1f1;
-            }
-    
-            /* What it does: Stops email clients resizing small text. */
-            * {
-                -ms-text-size-adjust: 100%;
-                -webkit-text-size-adjust: 100%;
-            }
-    
-            /* What it does: Centers email on Android 4.4 */
-            div[style*="margin: 16px 0"] {
-                margin: 0 !important;
-            }
-    
-            /* What it does: Stops Outlook from adding extra spacing to tables. */
-            table,
-            td {
-                mso-table-lspace: 0pt !important;
-                mso-table-rspace: 0pt !important;
-            }
-    
-            /* What it does: Fixes webkit padding issue. */
-            table {
-                border-spacing: 0 !important;
-                border-collapse: collapse !important;
-                table-layout: fixed !important;
-                margin: 0 auto !important;
-            }
-    
-            img {
-                -ms-interpolation-mode: bicubic;
-            }
-    
-            a {
-                text-decoration: none;
-            }
-    
-           
-            .unstyle-auto-detected-links *,
-            .aBn {
-                border-bottom: 0 !important;
-                cursor: default !important;
-                color: inherit !important;
-                text-decoration: none !important;
-                font-size: inherit !important;
-                font-family: inherit !important;
-                font-weight: inherit !important;
-                line-height: inherit !important;
-            }
-    
-            .a6S {
-                display: none !important;
-                opacity: 0.01 !important;
-            }
-    
-            .im {
-                color: inherit !important;
-            }
-    
-            img.g-img+div {
-                display: none !important;
-            }
-    
-            @media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
-                u~div .email-container {
-                    min-width: 320px !important;
-                }
-            }
-    
-          
-            @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
-                u~div .email-container {
-                    min-width: 375px !important;
-                }
-            }
-    
-           
-            @media only screen and (min-device-width: 414px) {
-                u~div .email-container {
-                    min-width: 414px !important;
-                }
-            }
-        </style>
-  
-    
-        <!-- Progressive Enhancements : BEGIN -->
-        <style>
-            .primary {
-                background: #30e3ca;
-            }
-    
-            .bg_white {
-                background: #ffffff;
-            }
-    
-            .bg_light {
-                background: #fafafa;
-            }
-    
-            .bg_black {
-                background: #000000;
-            }
-    
-            .bg_dark {
-                background: rgba(0, 0, 0, .8);
-            }
-    
-            .email-section {
-                padding: 2.5em;
-            }
-    
-            /*BUTTON*/
-            .btn {
-                padding: 10px 15px;
-                display: inline-block;
-            }
-    
-            .btn.btn-primary {
-                border-radius: 5px;
-                background: #30e3ca;
-                color: #ffffff;
-            }
-    
-            .btn.btn-white {
-                border-radius: 5px;
-                background: #ffffff;
-                color: #000000;
-            }
-    
-            .btn.btn-white-outline {
-                border-radius: 5px;
-                background: transparent;
-                border: 1px solid #fff;
-                color: #fff;
-            }
-    
-            .btn.btn-black-outline {
-                border-radius: 0px;
-                background: transparent;
-                border: 2px solid #000;
-                color: #000;
-                font-weight: 700;
-            }
-    
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6 {
-                font-family: 'Lato', sans-serif;
-                color: #000000;
-                margin-top: 0;
-                font-weight: 400;
-            }
-    
-            body {
-                font-family: 'Lato', sans-serif;
-                font-weight: 400;
-                font-size: 15px;
-                line-height: 1.8;
-                color: rgba(0, 0, 0, .4);
-            }
-    
-            a {
-                color: #30e3ca;
-            }
-    
-    
-    
-            /*LOGO*/
-    
-            .logo h1 {
-                margin: 0;
-            }
-    
-            .logo h1 a {
-                color: #30e3ca;
-                font-size: 24px;
-                font-weight: 700;
-                font-family: 'Lato', sans-serif;
-            }
-    
-            /*HERO*/
-            .hero {
-                position: relative;
-                z-index: 0;
-            }
-    
-            .hero .text {
-                color: rgba(0, 0, 0, .3);
-            }
-    
-            .hero .text h2 {
-                color: #000;
-                font-size: 40px;
-                margin-bottom: 0;
-                font-weight: 400;
-                line-height: 1.4;
-            }
-    
-            .hero .text h3 {
-                font-size: 24px;
-                font-weight: 300;
-            }
-    
-            .hero .text h2 span {
-                font-weight: 600;
-                color: #30e3ca;
-            }
-    
-    
-            /*HEADING SECTION*/
-    
-            .heading-section h2 {
-                color: #000000;
-                font-size: 28px;
-                margin-top: 0;
-                line-height: 1.4;
-                font-weight: 400;
-            }
-    
-            .heading-section .subheading {
-                margin-bottom: 20px !important;
-                display: inline-block;
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                color: rgba(0, 0, 0, .4);
-                position: relative;
-            }
-    
-            .heading-section .subheading::after {
-                position: absolute;
-                left: 0;
-                right: 0;
-                bottom: -10px;
-                content: '';
-                width: 100%;
-                height: 2px;
-                background: #30e3ca;
-                margin: 0 auto;
-            }
-    
-            .heading-section-white {
-                color: rgba(255, 255, 255, .8);
-            }
-    
-            .heading-section-white h2 {
-                line-height: 1;
-                padding-bottom: 0;
-            }
-    
-            .heading-section-white h2 {
-                color: #ffffff;
-            }
-    
-            .heading-section-white .subheading {
-                margin-bottom: 0;
-                display: inline-block;
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 2px;
-                color: rgba(255, 255, 255, .4);
-            }
-    
-    
-            ul.social {
-                padding: 0;
-            }
-    
-            ul.social li {
-                display: inline-block;
-                margin-right: 10px;
-            }
-    
-    
-            @media screen and (max-width: 500px) {}
-        </style>
-    
-    
-    </head>
-    
-    <body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #f1f1f1;">
-    
-        <center style="width: 100%;  box-shadow: #30e3ca;">
-    
-            <div
-                style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: sans-serif;">
-                &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
-            </div>
-            <div style="max-width: 600px; margin: 0 auto;" class="email-container">
-                <!-- BEGIN BODY -->
-                <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
-                    style="margin: auto;">
-                    <tr>
-                        <td valign="top" class="bg_white" style="padding: 1em 2.5em 0 2.5em;">
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                                <tr>
-                                    <td class="logo" style="text-align: center;">
-    
-                                        <h1><a href="#">KollectIt</a></h1>
-                                    </td>
-                                </tr>
-                                <td valign="middle" class="hero bg_white" style="padding: 3em 0 2em 0;" id="logo">
-                                    <img src="https://i.ibb.co/WBqh8zj/K-icon.png" alt="KollectIt logo"style="
-                                        width: 150px;
-                                         max-width: 600px;
-                                          height: auto; 
-                                          margin-top: -3%; 
-                                          display: block; 
-                                          margin-left: auto;
-                                        margin-right: auto;
-                                        ">
-                                </td>
-                            </table>
-                        </td>
-                    </tr><!-- end tr -->
-                    <tr>
-                    </tr><!-- end tr -->
-                    <tr>
-                        <td valign="middle" class="hero bg_white" style="padding: 2em 0 4em 0;">
-                            <table>
-                                <tr>
-                                    <td>
-                                        <div class="text" style="padding: 0 2.5em; text-align: center;">
-                                        
-                                        <h2>${textmessage}</h2>
-    
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr><!-- end tr -->
-                    <!-- 1 Column Text + Button : END -->
-                </table>
-    
-    
-            </div>
-        </center>
-    </body>
-    
-    </html>`,
-  };
 
-  transporter.sendMail(mailOptions, function (error, info) {
-    if (error) {
-      console.log("Email error=>", error);
-    } else {
-      console.log("Email sent: =>" + info.response);
-    }
-  });
-}
 
-//- otp  sms
-function otpSMs(obj) {
-  let receiverNumber = obj.receiver;
-  let textmessage = `Your OTP code for KollectIt app is ${obj.otp} . For any issues, contact ${obj.shortCode}`;
-  // let textmessage = `Please  provide this ${obj.otp} to Rider ${obj.employeeName} of ${obj.shortCode}`;
-  // console.log("sending otp sms",receiverNumber, textmessage);
-  smsSnd(receiverNumber, textmessage);
-}
-//- confirmation sms
 
-function otpConfirmation(receiverNumber, amount) {
-  let textmessage = `Your amount of Rs. ${amount} is successfully recorded`;
-  console.log("sending confirmation sms", amount);
-  smsSnd(receiverNumber, textmessage);
-}
 
-function smsSnd(receiver, textmessage) {
-  // let receiver = receiver;
-  // let options = {
-  //   host: "api.veevotech.com",
-  //   path:
-  //     "/sendsms?hash=" +
-  //     APIKey +
-  //     "&receivenum=" +
-  //     receiver +
-  //     "&sendernum=" +
-  //     encodeURIComponent(sender) +
-  //     "&textmessage=" +
-  //     encodeURIComponent(textmessage),
-  //   method: "GET",
-  //   setTimeout: 30000,
-  // };
-  // let req = http.request(options, (res) => {
-  //   res.setEncoding("utf8");
-  //   res.on("data", (chunk) => {
-  //     console.log(chunk.toString());
-  //   });
-  //   console.log("STATUS: " + res.statusCode);
-  // });
-  // req.on("error", function (e) {
-  //   console.log("problem with request: " + e.message);
-  // });
-  // console.log(options, "options");
-  // console.log(receiver, "receiver");
 
-  https.get(
-    "https://telenorcsms.com.pk:27677/corporate_sms2/api/auth.jsp?msisdn=tecStikAPI&password=*Hakunamatata%231985",
-    (resp) => {
-      resp.on("data", (chunk) => {
-        parseString(chunk, function (err, results) {
-          // console.log("resultsData", data);
-          ConforMessage(results.corpsms.data[0], receiver, textmessage);
-        });
-      });
-    }
-  );
-}
 
-function ConforMessage(dataConform, receiver, textmessage) {
-  // console.log(`session_id=${dataConform}&to=${receiver}&text=${textmessage}&mask=TecStik`);
-  https.get(
-    `https://telenorcsms.com.pk:27677/corporate_sms2/api/sendsms.jsp?session_id=${dataConform}&to=${receiver}&text=${textmessage}&mask=TecStik`,
-    (resp) => {
-      resp.on("data", (chunk) => {
-        console.log("dataConformChunk", chunk);
-        parseString(chunk, function (err, results) {
-          console.log("resultsData", results);
-        });
-      });
-    }
-  );
-}
+
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -530,8 +65,8 @@ app.use(
 app.use(express.json());
 app.use(morgan("short"));
 app.use("/auth", authRoutes);
-app.use("/dash", authRoutesDas);
-app.use("/kuickpay", kuickpayRoutes);
+//app.use("/dash", authRoutesDas);
+//app.use("/kuickpay", kuickpayRoutes);
 
 const storage = multer.diskStorage({
   destination: "./uploads/",
@@ -577,307 +112,104 @@ app.post("/upload", upload.any(), (req, res, next) => {
 
 //  creating UserProfile
 
-app.post("/PaymentData", (req, res, next) => {
-  if (!req.body.PaymentId && !req.body.belongsTo) {
+app.post("/userProfile", (req, res, next) => {
+  if (!req.body.fullName || !req.body.email) {
     res.status(409).send(`
-                    Please send PaymentName  in json body
-                    e.g:
-                    "PaymentId":"PaymentId",
-                    "PaymentName": "PaymentName",
-                    "PaymentEmail": "PaymentEmail"
+      Please send proper request body, like:
+      fullName:"MyName",
+      email:"myemail@domain.com ,
+      userDoB:"MMDDYY" ,
+      govId: "req.body.govId",
+      IdType: "req.body.IdType",
+      idProof:"req.body.idProof",
+      address:"req.body.address",
+      addressProof:"req.body.addressProof",
+      country: "req.body.country",
+      contactNumber: "req.body.contactNumber",
+      profession: "req.body.profession",
+      proofofFunds: "req.body.proofofFunds",
+      linkedCredentials: "req.body.linkedCredentials",
+      riskScore:""
                 `);
     return;
   } else {
-    const otp = Math.floor(getRandomArbitrary(1111, 9999));
-    const newPayment = new payment({
-      PaymentClientId: req.body.PaymentId, // user.clientID
-      PaymentName: req.body.PaymentName, // user.clientName
-      PaymentEmail: req.body.PaymentEmail, // user.clientEmail
-      PaymentNumber: req.body.PaymentNumber,
-      PaymentAmount: req.body.PaymentAmount,
-      PaymentMode: req.body.PaymentMode,
-      Rider_id: req.body.Rider_id,
-      imageUrl: req.body.imageUrl,
-      heldby: req.body.heldby,
-      drawOn: req.body.drawOn,
-      BelongsTo: req.body.belongsTo,
-      dueOn: req.body.dueOn,
-      AssignedBy: req.body.AssignedBy,
-      VerificationCode: otp,
-      status: req.body.status,
+    
+    const newProfile = new userProfile({
+      fullName: req.body.fullName,
+      email: req.body.email,
+      userDoB: req.body.userDoB,
+      govId: req.body.govId,
+      IdType: req.body.IdType,
+      idProof:req.body.idProof,
+      address:req.body.address,
+      addressProof:req.body.addressProof,
+      country: req.body.country,
+      contactNumber: req.body.contactNumber,
+      profession: req.body.profession,
+      proofofFunds: req.body.proofofFunds,
+      linkedCredentials: req.body.linkedCredentials,
+      riskScore:""
+    });
+    newProfile.save((err, doc) => {
+      if (!err) {
+         res.status(200).send({message:"User Profile Successfully Created, ",result:doc});
+      
+      } else {
+        res.status(500).send("Error in creating userProfile, " + err);
+      }
     });
 
-    quota.findOne({ BelongsTo: req.body.belongsTo }, (err, qta) => {
-      // console.log("Quota in PaymentData", qta);
-      if (qta) {
-        let limit = parseInt(qta.Limit);
-        let creditBalance=parseInt(qta.CreditBalance);
-        let rate=parseInt(qta.Rate);
-        let outstanding = parseInt(qta.Utilized);
-        let newOs = outstanding + 1;
-        if (limit > outstanding||creditBalance>=rate) {
-          console.log("Limit is available");
-          newPayment
-            .save()
-            .then((data) => {
-              //  Send OTP with SMS
-              // let Rider_id = data.Rider_id;
-              // console.log(Rider_id,req.body.Rider_id,"Rider_id");
-              // let textmessage = `Your Payment Verification Code is: ${otp}`;
 
-              employee.findById(
-                { _id: req.body.Rider_id },
-                (riderErr, riderData) => {
-                  if (!riderErr) {
-                    receiver = data.PaymentNumber;
-                    email = data.PaymentEmail;
-                    let Amount = parseInt(data.PaymentAmount).toLocaleString(
-                      "en-US"
-                    );
-                    textmessage = `Please Share PVC:${otp} with Rider: ${riderData.employeeName} of ${riderData.shortCode} for The Digital Receipt of ${data.PaymentMode}: PKR ${Amount}.`;
 
-                    smsSnd(receiver, textmessage);
-                    otpEmail(email, textmessage);
-
-                    setBelongs = data.BelongsTo;
-                    setRider = data.Rider_id;
-                    setClient = data.PaymentClientId;
-                    setClientName = data.PaymentName;
-                    setMode = "Deduct";
-                    setqty = 1;
-                    // smsIncrement(setBelongs, setRider, setClient, setMode, setqty)
-                    smsIncrement();
-                  } else {
-                    res.status(500).send({
-                      message: "Rider not found : " + riderErr,
-                    });
-                  }
-                }
-              );
-              res.send(data);
-            })
-            .catch((err) => {
-              res.status(500).send({
-                message: "an error occured : " + err,
-              });
-            });
-        } else {
-          console.log("Limit is insufficient");
-          res.status(400).send("Limit is insufficient");
-          // req.end();
-          // return;
-          employee.findById({ _id: req.body.belongsTo }, (err, doc) => {
-            if (!err) {
-              let email = doc.employeeEmail;
-              let message = "Limit is End";
-              emailSnd(message, email);
-              console.log(doc, "insufficient => Email");
-            } else {
-              console.log(err, "insufficient");
-            }
-          });
-        }
+  
+  }
+});
+//API to receive filter and return multi filtered Users--- might need deleting
+app.post("/multiFilteredUsers", (req, res, next) => {
+  if (!req.body.filter) {
+    res.status(409).send(`
+        Please send filter in json body
+        e.g:
+        "filter":"{}",
+    `);
+  } else {
+    userProfile.find(req.body.filter, (err, doc) => {
+      if (!err) {
+        res.send(doc);
       } else {
-        console.log("eror in finding Quota");
+        res.send(err);
       }
     });
   }
 });
-//---increment the tx
-function incrementTx(belongsTo) {
-  quota.findOne({ BelongsTo: belongsTo }, (err, qta) => {
-    console.log("Quota", qta);
-    if (qta) {
-      let outstanding = parseInt(qta.Utilized);
-      let newOs = outstanding + 1;
 
-      qta.update({ Utilized: newOs }, (err, data) => {
-        console.log("after updating", data);
-      });
-    } else {
-    }
-  });
-}
-// check quota
-function checkQuota(belongsTo) {
-  console.log("Checking Quota", belongsTo);
-  quota.findOne({ BelongsTo: belongsTo }, (err, qta) => {
-    if (qta) {
-      console.log("Quota", qta);
-      let limit = parseInt(qta.Limit);
-      let outstanding = parseInt(qta.Utilized);
-      let newOs = outstanding + 1;
-
-      if (limit > outstanding) {
-        console.log("Limit", limit, outstanding);
-        return true;
+// update filtered  User Profile
+app.put("/UpdateFilteredUserProfile", (req, res, next) => {
+  if (!req.body.filter || !req.body.update) {
+    res.status(409).send(`
+      Please send filter and update in json body
+      e.g:
+      "filter":"{}",
+      "update":"{}"
+  `);
+  } else {
+    userProfile.findOneAndUpdate(req.body.filter, req.body.update, (err, doc) => {
+      if (doc) {
+        res.status(200).send({message:"User Profile Successfully Updated, ",result:doc});
       } else {
-        console.log("Limit in Check Qupta", limit, outstanding);
-        return false;
+        res.send(err, "ERROR");
       }
-    } else {
-    }
-  });
-}
-// Otp Send Api
-
-//  Rendom 5 number Otp
-
-function getRandomArbitrary(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
-// Step 2 Recive Email Otp Api
-
-app.post("/ReciveOtpStep-2", (req, res, next) => {
-  if (!req.body.PayObjectId || !req.body.otp || !req.body.status) {
-    res.status(403).send(`
-              please send complete data
-              e.g:
-              {
-                  "PayObjectId": "xxx",
-                  "status": "xxxxxx",
-                  "otp": "xxxxx"
-              }`);
-    return;
+    });
   }
-  payment.findOne({ _id: req.body.PayObjectId }, (err, otpData) => {
-    // otpData = otpData[otpData.length - 1];
-    console.log("data for vcode", otpData);
-    if (otpData.VerificationCode === req.body.otp) {
-      otpData.update({ status: req.body.status }, (err, data) => {
-        // console.log(otpData, data);
-
-        textmessage =
-          "Payment of Rs. " +
-          otpData.PaymentAmount +
-          " is successfully received.";
-        // console.log(data);
-
-        employee.findById({ _id: otpData.Rider_id }, (riderErr, riderData) => {
-          if (!riderErr) {
-            //  share this code XXX to Rider Faiz of SWT
-            receiver = otpData.PaymentNumber;
-            email = otpData.PaymentEmail;
-            let Amount = parseInt(otpData.PaymentAmount).toLocaleString(
-              "en-US"
-            );
-            let obj = {
-              shortCode: riderData.shortCode,
-              employeeName: riderData.employeeName,
-              // otp: otpData.PaymentAmount
-            };
-
-            let date = ("0" + date_ob.getDate()).slice(-2);
-            let month = ("0" + (date_ob.getMonth() + 1)).slice(-2);
-            let year = date_ob.getFullYear();
-            // textmessage = `your Payment of Rs.${obj.otp} to Rider: ${obj.employeeName} of  is successfully received on`
-
-            textmessage = `Your Payment of Rs.${Amount} to Rider: ${
-              obj.employeeName
-            } of ${obj.shortCode} has been successfully received on  ${
-              date + "-" + month + "-" + year
-            }`;
-            smsSnd(receiver, textmessage);
-            otpEmail(email, textmessage);
-
-            setBelongs = otpData.BelongsTo;
-            setRider = otpData.Rider_id;
-            setClient = otpData.PaymentClientId;
-            setClientName = otpData.PaymentName;
-            setMode = "Deduct";
-            setqty = 1;
-            smsIncrement();
-            // smsIncrement(setBelongs, setRider, setClient, setMode, setqty)
-
-            // console.log(setBelongs, setRider, setClient, "check");
-            //  ============>
-            // console.log("Sending OTPs", receiver, data.PaymentEmail);
-            //  ==================>
-          } else {
-          }
-        });
-
-        // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(docEamil)
-        //   ? receiptEmail(docEamil, amount) //emailSnd(docEamil, textmessage)
-        //   : smsSnd(receiver, textmessage);
-      });
-      res.send(otpData);
-    } else {
-      res.status(500).send({
-        message:
-          " do you have correct OTP an error occured:" + JSON.stringify(err),
-      });
-    }
-  });
 });
 
-function smsIncrement() {
-  // console.log("Checking Quota", setBelongs, setRider, setClient, setMode, setqty);
-  quota.findOne({ BelongsTo: setBelongs }, (err, qta) => {
-    if (qta) {
-      console.log("Quota", qta);
-      // let limit = parseInt(qta.Limit);
-      let balance = parseInt(qta.CreditBalance);
-      let rate = parseInt(qta.Rate);
-      let outstanding = parseInt(qta.Utilized);
-      let newBalance = balance - rate;
-      let newOs = outstanding + 1;
-      // console.log(balance,"balance");
-      // console.log(rate,"rate");
-      // console.log(outstanding,"outstanding");
-      // console.log(newBalance,"newBalance");
-      // console.log(newOs,"newOs");
-      qta.updateOne(
-        { Utilized: newOs, CreditBalance: newBalance },
-        (err, updatestatus) => {
-          if (updatestatus) {
-            // console.log({ message: "qta created Successfully!" });
-            const ledger = new SmSledger({
-              Mode: setMode, // add
-              Sender: setRider,
-              Reciver: setClient,
-              BelongsTo: setBelongs, //
-              Qty: setqty, // amount
-            });
-            ledger
-              .save()
-              .then((data) => {
-                console.log(data, "SMS Leger Create");
-                let amount = 10 * 1;
-                let description = `SMS snd to ${setClientName}`;
-                let mode = "Debit";
-                CraeteVoucher(amount, description, mode);
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-            // SmSledger.findOne({ _id: setClient }, (err, data) => {
-            //   // console.log(data);
-            //   if (!err) {
-            //     console.log(data, "response");
-            //   }else{
-            //     console.log(err, "response");
 
-            //   }
-            // })
-          } else {
-            console.log(err, "ERROR");
-          }
-        }
-      );
 
-      // if (limit > outstanding) {
-      //   console.log("Limit", limit, outstanding);
-      //   return true;
-      // } else {
-      //   console.log("Limit in Check Qupta", limit, outstanding);
-      //   return false;
-      // }
-    } else {
-    }
-  });
-}
+
+
+
+
+
 
 //API to receive filter and return filtered Payments
 app.post("/smsLedger", (req, res, next) => {
@@ -936,26 +268,7 @@ app.post("/ReSendOTP", (req, res) => {
 });
 
 // Post conformationPayment
-app.post("/conformationPayment", (req, res, next) => {
-  if (!req.body.ClientObjectId) {
-    res.send("ClientObjectId");
-  } else {
-    clientdata.findById({ _id: req.body.ClientObjectId }, (err, data) => {
-      if (!err) {
-        let textmessage = `<h1>Thank for Payment has been Recive & payment is successfully recorded in our system.</h1>`;
-        receiver = data.ClientPhoneNumber;
-        docEamil = data.ClientEmail;
 
-        // /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(data.ClientEmail)
-        //   ? emailSnd(docEamil, textmessage)
-        //   : smsSnd(receiver, textmessage);
-        res.send(data);
-      } else {
-        res.send(err);
-      }
-    });
-  }
-});
 // Get all Data Payment Api
 
 app.get("/", (req, res, next) => {

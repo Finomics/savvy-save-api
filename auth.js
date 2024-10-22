@@ -93,7 +93,7 @@ app.post("/userSignup", (req, res, next) => {
           password: req.body.password,
           status: "Signup",
         });
-        employ.save((err, doc) => {
+        user.save((err, doc) => {
           if (!err) {
              res.status(200).send("User Successfully Created, ",doc);
           

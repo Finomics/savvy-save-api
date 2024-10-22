@@ -195,7 +195,7 @@ app.put("/UpdateFilteredUserProfile", (req, res, next) => {
   } else {
     userProfile.findOneAndUpdate(req.body.filter, req.body.update, (err, doc) => {
       if (doc) {
-        res.status(200).send({message:"User Profile Successfully Updated, ",result:doc});
+        res.status(200).send({message:"User Profile Successfully Updated.",result:doc});
       } else {
         res.send(err, "ERROR");
       }

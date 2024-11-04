@@ -74,6 +74,21 @@ let userCredentials = mongoose.model("UserCredentials", userCredentialsSchema);
 
 // user Profile End
 
+// user goal start
+let userGoalSchema = mongoose.Schema({
+  goalName: String,
+  templateId: String,
+  targetValue: Int,
+  initialContribution: Int,
+  frequency: String,
+  recurring: Int,
+  timeHorizon: Int,
+  status: String,
+  createdOn: { type: Date, default: Date.now },
+});
+let userGoals = mongoose.model("UserGoals", userGoalSchema);
+
+// user goals end
 module.exports = {
   userProfile: userProfile,
   userCredentials: userCredentials

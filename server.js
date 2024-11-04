@@ -87,6 +87,14 @@ admin.initializeApp({
 
 const bucket = admin.storage().bucket("gs://toys-db4fb.appspot.com");
 
+
+
+app.get("/", (req, res, next) => {
+  console.log("SAVVY SAVE Server is Live:");
+      res.send("Server is live");
+   
+  });
+
 // Upload Imag Api
 
 app.post("/upload", upload.any(), (req, res, next) => {
@@ -150,6 +158,7 @@ app.post("/userProfile", (req, res, next) => {
       linkedCredentials: req.body.linkedCredentials,
       riskScore:""
     });
+    console.log("Created User Profile Object:",newProfile)
     newProfile.save((err, doc) => {
       if (!err) {
          res.status(200).send({message:"User Profile Successfully Created, ",result:doc});

@@ -16,7 +16,7 @@ let date_ob = new Date();
 const { ServerSecretKey, PORT } = require("./core/index");
 const {
  userCredentials,
- userProfile
+ userProfile,userGoals
 } = require("./dbase/modules");
 const serviceAccount = require("./firebase/firebase.json");
 const client = new postmark.Client("fa2f6eae-eaa6-4389-98f0-002e6fc5b900");
@@ -173,6 +173,53 @@ app.post("/userProfile", (req, res, next) => {
   
   }
 });
+
+//  creating Goal
+
+app.post("/createGoal", (req, res, next) => {
+  if (!req.body.goalName || !req.body.templateId) {
+    res.status(409).send(`
+      Please send proper request body, like:
+     goalName: "Education,
+  templateId: 1,
+  targetValue: 500000,
+  initialContribution: 50.000,
+  frequency: "Monthly",
+  recurring: 5000,
+  timeHorizon:365, in days
+  status:"draft  ,// draft, funded, matured, redeemed
+                `);
+    return;
+  } else {
+    
+    const newGoal = new userGoals({
+      goalName: req.body.goalName,
+      templateId: req.body.templateId,
+      targetValue: req.body.targetValue,
+      initialContribution: req.body.initialContribution,
+      frequency: req.body.frequency,
+      recurring: req.body.recurring,
+      timeHorizon:req.body.timeHorizon,
+      status:"draft"
+
+   
+    });
+    console.log("Created User goal Object:",newGoal)
+    newGoal.save((err, doc) => {
+      if (!err) {
+         res.status(200).send({message:"User Goal Successfully Created, ",result:doc});
+      
+      } else {
+        res.status(500).send("Error in creating userGoal, " + err);
+      }
+    });
+
+
+
+  
+  }
+});
+
 //API to receive filter and return multi filtered Users--- might need deleting
 app.post("/multiFilteredUsers", (req, res, next) => {
   if (!req.body.filter) {

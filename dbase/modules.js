@@ -78,12 +78,12 @@ let userCredentials = mongoose.model("UserCredentials", userCredentialsSchema);
 let userGoalSchema = mongoose.Schema({
   goalName: String,
   templateId: String,
-  targetValue: Int,
-  initialContribution: Int,
-  frequency: String,
-  recurring: Int,
-  timeHorizon: Int,
-  status: String,
+  targetValue:Number ,
+  initialContribution: Number ,
+  frequency: String,// monthly quarterly semiannual
+  recurring:Number ,
+  timeHorizon:Number ,
+  status: String,// draft, funded, matured, redeemed
   createdOn: { type: Date, default: Date.now },
 });
 let userGoals = mongoose.model("UserGoals", userGoalSchema);
@@ -91,6 +91,7 @@ let userGoals = mongoose.model("UserGoals", userGoalSchema);
 // user goals end
 module.exports = {
   userProfile: userProfile,
-  userCredentials: userCredentials
+  userCredentials: userCredentials,
+  userGoals:userGoals
 
 };

@@ -76,7 +76,7 @@ app.post("/login", (req, res, next) => {
 // Create user signup
 
 app.post("/userSignup", (req, res, next) => {
-  if (!req.body.loginId || !req.body.password) {
+  if (!req.body.username || !req.body.password) {
     res.status(409).send(`
                     Please send complete request body
               username:,
@@ -85,7 +85,7 @@ app.post("/userSignup", (req, res, next) => {
                 `);
     return;
   } else {
-    employee.findOne({ loginId: req.body.loginId }, (err, doc) => {
+    userCredentials.findOne({ loginId: req.body.loginId }, (err, doc) => {
       if (!err && !doc) {
         let user = new userCredentials({
           username: req.body.username,
@@ -94,6 +94,8 @@ app.post("/userSignup", (req, res, next) => {
           status: "Signup",
         });
         user.save((err, doc) => {
+          console.log("Response from server", err,doc);
+
           if (!err) {
              res.status(200).send("User Successfully Created, ",doc);
           
@@ -102,6 +104,7 @@ app.post("/userSignup", (req, res, next) => {
           }
         });
       } else if (err) {
+        console.log("Response from server", err,doc);
         res.status(500).send({
           message: "Server encuntered an error",
         });
